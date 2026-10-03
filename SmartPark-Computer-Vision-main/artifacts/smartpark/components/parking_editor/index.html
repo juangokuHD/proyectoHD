@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; background: transparent; }
+      #frame { width: 100%; overflow: hidden; border: 1px solid #2b3945; border-radius: 10px; }
+      #canvas { display: block; width: 100%; height: auto; cursor: crosshair; }
+      #canvas.locked { cursor: default; }
+      #hint { padding: 8px 11px; color: #a7b7c1; background: #17212a; font: 12px/1.4 system-ui, sans-serif; }
+    </style>
+  </head>
+  <body>
+    <div id="frame">
+      <canvas id="canvas"></canvas>
+      <div id="hint"></div>
+    </div>
+    <script>
+      const canvas = document.getElementById("canvas");
+      const context = canvas.getContext("2d");
+      const hint = document.getElementById("hint");
+      const image = new Image();
+      let args = {};
+      let points = [];
+      let sourceWidth = 1;
+      let sourceHeight = 1;
+
+      function send(type, payload) {
+        window.parent.postMessage({ isStreamlitMessage: true, type, ...payload }, "*");
+      }
+      function resizeFrame() {
+        const width = Math.min(sourceWidth, 980);
+        canvas.style.width = width + "px";
+        canvas.style.maxWidth = "100%";
+        send("streamlit:setFrameHeight", { height: document.body.scrollHeight });
+      }
+      function draw() {
+        if (!image.complete || !image.naturalWidth) return;
+        sourceWidth = Number(args.width) || image.naturalWidth;
+        sourceHeight = Number(args.height) || image.naturalHeight;
+        canvas.width = sourceWidth;
+        canvas.height = sourceHeight;
+        context.drawImage(image, 0, 0, sourceWidth, sourceHeight);
+
+        for (const space of (args.spaces || [])) {
+          const factorX = sourceWidth / (Number(args.referenceWidth) || sourceWidth);
+          const factorY = sourceHeight / (Number(args.referenceHeight) || sourceHeight);
+          const polygon = (space.polygon || []).map((point) => [point.x * factorX, point.y * factorY]);
+          if (polygon.length !== 4) continue;
+          context.beginPath();
+          context.moveTo(...polygon[0]);
+          polygon.slice(1).forEach((point) => context.lineTo(...point));
+          context.closePath();
+          context.fillStyle = "rgba(32, 186, 126, .2)";
+          context.fill();
+          context.strokeStyle = "#38dc9b";
+          context.lineWidth = Math.max(2, sourceWidth / 700);
+          context.stroke();
+          const centerX = polygon.reduce((sum, point) => sum + point[0], 0) / 4;
+          const centerY = polygon.reduce((sum, point) => sum + point[1], 0) / 4;
+          context.font = `600 ${Math.max(14, sourceWidth / 55)}px system-ui`;
+          context.textAlign = "center";
+          context.fillStyle = "#f4fbff";
+          context.strokeStyle = "rgba(10, 18, 26, .9)";
+          context.lineWidth = 4;
+          context.strokeText(space.id, centerX, centerY);
+          context.fillText(space.id, centerX, centerY);
+        }
+
+        if (points.length) {
+          context.fillStyle = "#57d8c5";
+          context.strokeStyle = "#0c171d";
+          context.lineWidth = Math.max(3, sourceWidth / 300);
+          points.forEach((point, index) => {
+            context.beginPath();
+            context.arc(point.x, point.y, Math.max(5, sourceWidth / 180), 0, Math.PI * 2);
+            context.fill();
+            context.stroke();
+            context.fillStyle = "#ffffff";
+            context.font = `700 ${Math.max(13, sourceWidth / 65)}px system-ui`;
+            context.fillText(String(index + 1), point.x + 8, point.y - 8);
+            context.fillStyle = "#57d8c5";
+          });
+          if (points.length > 1) {
+            context.beginPath();
+            context.moveTo(points[0].x, points[0].y);
+            points.slice(1).forEach((point) => context.lineTo(point.x, point.y));
+            if (points.length === 4) context.closePath();
+            context.strokeStyle = "#57d8c5";
+            context.lineWidth = Math.max(2, sourceWidth / 600);
+            context.stroke();
+          }
+        }
+        canvas.classList.toggle("locked", !args.editable);
+        hint.textContent = args.editable
+          ? `${points.length}/4 points · Click clockwise around one parking space`
+          : "Camera layout overlay · Coordinates scale with the image resolution";
+        resizeFrame();
+      }
+
+      canvas.addEventListener("click", (event) => {
+        if (!args.editable || points.length >= 4) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = (event.clientX - rect.left) * (canvas.width / rect.width);
+        const y = (event.clientY - rect.top) * (canvas.height / rect.height);
+        points = [...points, { x: Math.round(x), y: Math.round(y) }];
+        send("streamlit:setComponentValue", { value: { points } });
+        draw();
+      });
+      window.addEventListener("message", (event) => {
+        const message = event.data || {};
+        if (message.type !== "streamlit:render") return;
+        args = message.args || {};
+        points = Array.isArray(args.points) ? args.points : points;
+        image.onload = draw;
+        image.src = args.image || "";
+        if (image.complete) draw();
+      });
+      send("streamlit:componentReady", { apiVersion: 1 });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "SmartPark"
+description = "A university parking analysis app that accepts parking-lot images, detects vehicles locally with YOLO, lets users define camera-specific parking polygons, computes occupancy, and exports annotated results."
+version = "1.0.0"
+id = "artifacts/smartpark"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 20147
+
+[services.development]
+run = "pnpm --filter @workspace/smartpark run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/smartpark", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/smartpark/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20147"
+BASE_PATH = "/"

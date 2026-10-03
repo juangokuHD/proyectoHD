@@ -1,0 +1,1 @@
+- [Ultralytics and OpenCV setup](smartpark-yolo-deps.md) — verify Python source mappings and avoid mixing OpenCV wheels that share the `cv2` namespace.

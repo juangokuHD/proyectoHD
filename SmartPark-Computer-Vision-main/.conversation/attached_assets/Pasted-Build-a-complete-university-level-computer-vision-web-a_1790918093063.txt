@@ -1,0 +1,308 @@
+Build a complete university-level computer vision web application called "SmartPark".
+
+IMPORTANT:
+I need a WORKING application, not just a visual mockup.
+Generate all required source code, configuration files, dependencies, sample data, and instructions to run the project.
+
+PROJECT PURPOSE:
+SmartPark is an intelligent university parking management system that uses computer vision to analyze parking lot images and determine which parking spaces are occupied or available.
+
+The application should allow a user to upload a parking lot image and automatically detect vehicles and determine the occupancy status of parking spaces.
+
+TECHNOLOGY:
+- Python
+- Streamlit for the web interface
+- OpenCV for image processing
+- Ultralytics YOLO for vehicle detection
+- NumPy
+- Pillow
+- JSON for storing parking-space coordinates
+- Do NOT require a paid API.
+- Do NOT use a cloud AI API.
+- The computer vision processing should run locally inside the application.
+
+MAIN REQUIREMENTS:
+
+1. IMAGE UPLOAD
+Create a modern web interface where the user can upload:
+- PNG
+- JPG
+- JPEG
+
+The uploaded image must be displayed clearly.
+
+2. PARKING SPACE CONFIGURATION
+The application must allow the user to define parking spaces directly on an image.
+
+The user should be able to click four points for each parking space to create a quadrilateral polygon.
+
+Each parking space must have:
+- ID
+- four coordinates
+- polygon
+
+The parking-space configuration must be saved in a JSON file.
+
+The application must NOT assume that every uploaded image has the same resolution.
+
+If the uploaded image has a different resolution from the reference image, scale the parking-space coordinates proportionally.
+
+3. VEHICLE DETECTION
+Use a pretrained Ultralytics YOLO model to detect:
+- cars
+- motorcycles
+- buses
+- trucks
+
+Use confidence thresholds and image resizing appropriate for parking-lot images.
+
+The application must show bounding boxes around detected vehicles.
+
+Display the confidence score for each detected vehicle.
+
+4. PARKING OCCUPANCY
+For every configured parking space, determine whether it is:
+- AVAILABLE
+- OCCUPIED
+
+A parking space should be considered occupied when a detected vehicle significantly overlaps the parking-space polygon.
+
+Do not rely only on the center point of the vehicle.
+
+Use polygon intersection / overlap logic so that partially overlapping vehicles can still be detected.
+
+5. VISUALIZATION
+Draw each parking space directly on the analyzed image.
+
+Use:
+- GREEN = available
+- RED = occupied
+
+Display the parking-space ID.
+
+Display the vehicle bounding boxes.
+
+The result should be easy to understand visually.
+
+6. STATISTICS
+Show a dashboard containing:
+
+Total parking spaces
+Available spaces
+Occupied spaces
+Occupancy percentage
+Number of detected vehicles
+
+Also show an occupancy level:
+
+LOW
+MEDIUM
+HIGH
+
+Suggested thresholds:
+0-49% = LOW
+50-79% = MEDIUM
+80-100% = HIGH
+
+7. RESULT PANEL
+On the analyzed image, display a compact semi-transparent statistics panel.
+
+The panel MUST be located at the BOTTOM-RIGHT corner of the image.
+
+It must NOT cover the main parking spaces unnecessarily.
+
+Show:
+
+Total: X
+Available: X
+Occupied: X
+Occupancy: X%
+Vehicles: X
+
+8. USER INTERFACE
+Create a professional modern dashboard.
+
+Use a dark modern interface.
+
+The main page should contain:
+
+Header:
+"SmartPark"
+"Intelligent Parking Space Detection"
+
+Sidebar:
+- Upload image
+- Configure parking spaces
+- Analyze parking lot
+- Reset configuration
+
+Main area:
+- Uploaded image
+- Analysis button
+- Statistics cards
+- Processed image
+- Download result button
+
+Use clear icons where appropriate.
+
+9. MULTIPLE IMAGES
+The application must support analyzing different images.
+
+Do NOT permanently hard-code the original image.
+
+The user should be able to upload another image.
+
+However, explain that parking-space coordinates correspond to a specific camera/view.
+
+Provide an option to create or configure parking spaces for a new camera angle.
+
+10. IMAGE RESOLUTION
+The application must handle images with different resolutions.
+
+Do not assume a fixed resolution such as 536x353.
+
+Parking-space coordinates must be scaled when necessary.
+
+For vehicle detection, resize images internally to an appropriate YOLO input size while preserving aspect ratio as much as possible.
+
+11. ERROR HANDLING
+If no vehicles are detected, do not crash.
+
+Show:
+
+"No vehicles detected"
+
+but still display the parking spaces.
+
+If no parking spaces have been configured, explain how to configure them.
+
+If the uploaded image is invalid, show a clear error message.
+
+12. PROJECT STRUCTURE
+Create a clean project structure similar to:
+
+SmartPark/
+│
+├── app.py
+├── detector.py
+├── parking_spaces.py
+├── utils.py
+├── requirements.txt
+├── README.md
+│
+├── data/
+│   ├── parking_spaces.json
+│   └── sample/
+│
+└── outputs/
+
+13. CODE QUALITY
+Write clean, organized, commented Python code.
+
+Separate:
+- UI logic
+- YOLO detection
+- parking-space management
+- occupancy calculation
+- image processing
+
+Do not put everything into one huge function.
+
+14. PERFORMANCE
+Use Streamlit caching for the YOLO model so the model is not loaded every time the application changes.
+
+Avoid unnecessary repeated model inference.
+
+15. DOWNLOAD
+Allow the user to download the processed image as PNG.
+
+16. DEMONSTRATION MODE
+Include a sample parking-lot image if possible.
+
+The application should be usable immediately after installation.
+
+17. ACADEMIC PURPOSE
+This is a university Artificial Intelligence / Computer Vision project.
+
+The application should demonstrate:
+- computer vision
+- object detection
+- image processing
+- classification of parking-space occupancy
+- visualization
+- quantitative results
+
+18. IMPORTANT ARCHITECTURE
+
+The system should work like this:
+
+Parking image
+      ↓
+Image preprocessing
+      ↓
+YOLO vehicle detection
+      ↓
+Detected vehicle bounding boxes
+      ↓
+Parking-space polygons
+      ↓
+Polygon/vehicle overlap calculation
+      ↓
+AVAILABLE or OCCUPIED
+      ↓
+Statistics
+      ↓
+Visualization
+      ↓
+Downloadable result
+
+19. DOCUMENTATION
+Create a README.md explaining:
+
+- Project purpose
+- Problem statement
+- Objectives
+- Technologies
+- Installation
+- How to run
+- How to configure parking spaces
+- How vehicle detection works
+- How occupancy is calculated
+- Project architecture
+- Limitations
+- Possible future improvements
+
+20. VERY IMPORTANT
+Do not create fake AI results.
+
+The application must actually run YOLO on the uploaded image.
+
+Do not simply classify an image based on filename.
+
+Do not hard-code the result as "0 occupied".
+
+Do not hard-code the number of vehicles.
+
+Do not use random values.
+
+The vehicle count and parking occupancy must come from the computer-vision processing.
+
+21. TESTING
+After generating the project, run the application and test it.
+
+Fix Python errors, dependency errors, Streamlit errors, OpenCV errors, and YOLO errors you encounter.
+
+Make sure the application starts successfully.
+
+22. FINAL RESPONSE
+After building the application, tell me:
+
+1. What files you created.
+2. How to run the application.
+3. What dependencies are required.
+4. How to upload an image.
+5. How to configure parking spaces.
+6. How the vehicle detection works.
+7. How occupancy is calculated.
+
+Please build the complete working application now.

@@ -1,0 +1,1 @@
+"""Local computer-vision pipeline for SmartPark."""
